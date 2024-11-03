@@ -35,7 +35,7 @@ grid4=[
         [Place(Piece('purple'),None), Place(None,None),Place(None,None),  Place(None,'w')]
         ]
 
-boards=[Board(grid4,3,4,3),Board(grid4,3,4,3),Board(grid1,5,5,3),Board(grid2,5,5,3)]
+boards=[Board(grid4,3,4,3),Board(grid3,3,4,3),Board(grid1,5,5,3),Board(grid2,5,5,3)]
 
 class MagnetGameGUI:
     def __init__(self, root):
@@ -97,7 +97,7 @@ class MagnetGameGUI:
 
             self.selected_piece = None
 
-            
+
     def show_step(self):
         controls = tk.Frame(self.root)
         controls.grid(row=self.board.size + 1, column=0)
