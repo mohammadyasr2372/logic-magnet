@@ -3,6 +3,8 @@ import tkinter as tk
 from tkinter import messagebox
 
 from BOARD.board import Board
+# from BOARD.board import final_board
+# from BOARD.board import path
 from BOARD.pice import Piece
 from BOARD.place import Place
 step=-1
@@ -42,26 +44,39 @@ class MagnetGameGUI:
         self.root = root
         self.root.title("Magnets Logic Game")
         self.board = boards[idboard]
-
         self.selected_piece = None
         self.selected_piece_x = None
         self.selected_piece_y = None
+        self.create_steps_display()  
         self.create_board_ui()
-        self.show_step()
+        # self.show_step()
 
 
     def create_board_ui(self):
+        # controls = tk.Frame(self.root)
+        tk.Button(self.root, text="Solve Bfs", command=self.solve_game_bfs).grid(row=self.board.size + 2, column=0)
+        tk.Button(self.root, text="Solve Dfs", command=self.solve_game_dfs).grid(row=self.board.size + 4, column=0)
         self.board_frame = tk.Frame(self.root)
         self.board_frame.grid(row=0, column=0)
-
-
         self.buttons = [[None for _ in range(self.board.colom)] for _ in range(self.board.size)]
         for i in range(self.board.size):
             for j in range(self.board.colom):
                 btn = tk.Button(self.board_frame, width=8, height=5, command=lambda i=i, j=j: self.select_piece(i, j))
                 btn.grid(row=i, column=j)
+                self.board.grid[i][j].position=i,j
                 self.buttons[i][j] = btn
         self.update_board_ui()
+
+    def create_steps_display(self):
+        self.steps_text = tk.Text(self.root, height=10, width=40)
+        self.steps_text.grid(row=self.board.size + 3, column=0)
+        self.steps_text.insert(tk.END, "Steps to solution will appear here...\n")
+
+    def update_steps_display(self, steps):
+        self.steps_text.delete(1.0, tk.END)
+        self.steps_text.insert(tk.END, "Steps to solution:\n")
+        for step in steps:
+            self.steps_text.insert(tk.END, f"{step}\n")
 
     def select_piece(self, x, y):
         place = self.board.grid[x][y]
@@ -77,15 +92,10 @@ class MagnetGameGUI:
     
     def move_selected_piece(self,x1,y1,x2,y2):
         if self.selected_piece:
-            self.board.swap_piece(x1,y1,self.selected_piece, x2, y2)
+            self.board.grid=self.board.move_piece(x1,y1,self.selected_piece, x2, y2,self.board.grid)
             self.update_board_ui()
-            global step
-            if(step>self.board.range_step):
-                messagebox.showinfo("Congratulations!", "انتهت الخطوات")
-                self.root.quit()
-            else:
 
-                if self.board.is_solved():
+            if self.board.is_solved(self.board.grid):
                         messagebox.showinfo("Congratulations!", "تم حل اللغز")
                         self.root.quit()
                         step=-1
@@ -96,21 +106,41 @@ class MagnetGameGUI:
                         self.root.mainloop()
 
             self.selected_piece = None
-
+    
+    def solve_game_bfs(self):
+        path = self.board.bfs_solve()
+        if path is not None:
+            print(path)
+            print("Solution found! Steps to solution:")
+            self.update_steps_display(path)
+            self.update_board_ui()
+        else:
+            self.update_steps_display("No solution exists.")
+            print("No solution exists.")
+    
+    def solve_game_dfs(self):
+        path = self.board.dfs_solve()
+        if path is not None:
+            print(path)
+            print("Solution found! Steps to solution:")
+            self.update_steps_display(path)
+            self.update_board_ui()
+        else:
+            self.update_steps_display("No solution exists.")
+            print("No solution exists.")
 
     def show_step(self):
         controls = tk.Frame(self.root)
-        controls.grid(row=self.board.size + 1, column=0)
+        # controls.grid(row=self.board.size + 1, column=0)
 
-
-        tk.Button(controls, text=step, command=None).grid(row=1, column=2)
+        tk.Button(self.root, text="Solve", command=self.solve_game).grid(row=self.board.size + 2, column=0)
 
     def update_board_ui(self):
 
-        global step
-        step+=1
-        self.show_step()
-        print(step)
+        # global step
+        # step+=1
+        # self.show_step()
+        # print(step)
         for i in range(self.board.size):
             for j in range(self.board.colom):
                 place = self.board.grid[i][j]
